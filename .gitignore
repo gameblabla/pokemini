@@ -1,0 +1,11 @@
+*.gcda
+*.elf
+*.o
+*.dge
+*.min
+*.eep
+Build
+PokeMini
+*.tns
+pokemini
+*.opk

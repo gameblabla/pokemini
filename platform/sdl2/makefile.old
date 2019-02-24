@@ -1,27 +1,38 @@
-# PokeMini Makefile for SDL
+# PokeMini Makefile for SDL 2
 
-CC =  nspire-gcc
-LD =  nspire-gcc
-STRIP = 
+CC = gcc
+LD = gcc
+STRIP = strip
 POKEROOT = ../../
 BUILD = Build
-TARGET = pokemini.elf
+TARGET = PokeMini
 
-CFLAGS = -DARM9 -Ofast -fomit-frame-pointer -mthumb -mthumb-interwork -marm -march=armv5te -mtune=arm926ej-s -DNO_ZIP -DPERFORMANCE -DNSPIRE -Wall $(INCLUDE)
-SLFLAGS = -Wl,--as-needed -flto -O -lSDL -lm
+WINTARGET = PokeMini.exe
+WINRES_TRG = $(BUILD)/pokemini_rc.o
+WINRES_SRC = $(POKEROOT)resource/pokemini.rc
 
-INCDIRS = source sourcex resource freebios
+CFLAGS = -O -Wall `$(SDL_BASE)sdl2-config --cflags` $(INCLUDE)
+SLFLAGS = -O `$(SDL_BASE)sdl2-config --libs` -lm -lz
+
+INCDIRS = source sourcex resource freebios dependencies/minizip
 
 OBJS = \
- n2DLib.o	\
- PokeMini_SDL.o	\
- PokeMini.o	\
- Hardware_nsp.o	\
+ PokeMini_SDL2.o	\
+ sourcex/KeybMapSDL2.o	\
+ sourcex/ExportBMP.o	\
+ sourcex/ExportWAV.o	\
  freebios/freebios.o	\
  source/PMCommon.o	\
+ source/PokeMini.o	\
  source/Multicart.o	\
+ source/Hardware.o	\
  source/Video.o	\
+ source/Video_x1.o	\
+ source/Video_x2.o	\
  source/Video_x3.o	\
+ source/Video_x4.o	\
+ source/Video_x5.o	\
+ source/Video_x6.o	\
  source/CommandLine.o	\
  source/MinxCPU.o	\
  source/MinxCPU_XX.o	\
@@ -34,14 +45,23 @@ OBJS = \
  source/MinxPRC.o	\
  source/MinxColorPRC.o	\
  source/MinxLCD.o	\
+ source/MinxAudio.o	\
  source/UI.o	\
  source/Joystick.o	\
+ source/Keyboard.o	\
+ dependencies/minizip/unzip.o	\
+ dependencies/minizip/ioapi.o	\
  resource/PokeMini_ColorPal.o	\
  resource/PokeMini_Font12.o	\
  resource/PokeMini_Icons12.o	\
+ resource/PokeMini_BG2.o	\
  resource/PokeMini_BG3.o	\
+ resource/PokeMini_BG4.o	\
+ resource/PokeMini_BG5.o	\
+ resource/PokeMini_BG6.o
 
 DEPENDS = \
+ sourcex/KeybMapSDL2.h	\
  sourcex/ExportBMP.h	\
  sourcex/ExportWAV.h	\
  freebios/freebios.h	\
@@ -52,7 +72,12 @@ DEPENDS = \
  source/Multicart.h	\
  source/Hardware.h	\
  source/Video.h	\
+ source/Video_x1.h	\
+ source/Video_x2.h	\
  source/Video_x3.h	\
+ source/Video_x4.h	\
+ source/Video_x5.h	\
+ source/Video_x6.h	\
  source/CommandLine.h	\
  source/MinxCPU.h	\
  source/MinxTimers.h	\
@@ -64,12 +89,17 @@ DEPENDS = \
  source/MinxAudio.h	\
  source/UI.h	\
  source/Joystick.h	\
+ source/Keyboard.h	\
  dependencies/minizip/unzip.h	\
  dependencies/minizip/ioapi.h	\
  resource/PokeMini_ColorPal.h	\
  resource/PokeMini_Font12.h	\
  resource/PokeMini_Icons12.h	\
+ resource/PokeMini_BG2.h	\
  resource/PokeMini_BG3.h	\
+ resource/PokeMini_BG4.h	\
+ resource/PokeMini_BG5.h	\
+ resource/PokeMini_BG6.h
 
 BUILDOBJS = $(addprefix $(BUILD)/, $(notdir $(OBJS)))
 DEPENDSHDR = $(addprefix $(POKEROOT), $(DEPENDS))
@@ -77,17 +107,8 @@ INCLUDE = $(foreach inc, $(INCDIRS), -I$(POKEROOT)$(inc))
 VPATH = $(addprefix $(POKEROOT),$(INCDIRS))
 
 .PHONY: all win clean
- 
-all: $(BUILD) $(TARGET) gzn prg
 
-gzn:
-	genzehn --input ./$(TARGET) --output ./pokemini.tns --name "pokemini" --compress
-
-prg:
-	make-prg ./pokemini.tns ./pokemini.prg.tns
-	rm ./pokemini.tns
-	rm ./$(TARGET)
-	mv ./pokemini.prg.tns ./pokemini.tns
+all: $(BUILD) $(TARGET)
 
 $(BUILD):
 	@[ -d @ ] || mkdir -p $@
@@ -97,6 +118,14 @@ $(BUILD)/%.o: %.c $(DEPENDSHDR)
 
 $(TARGET): $(BUILDOBJS)
 	$(LD) -o $(TARGET) $(BUILDOBJS) $(SLFLAGS)
+	$(STRIP) $(TARGET)
+
+win: $(BUILD) $(WINTARGET)
+
+$(WINTARGET): $(BUILDOBJS) $(WINRES_SRC)
+	windres $(INCLUDE) $(WINRES_SRC) $(WINRES_TRG)
+	$(LD) -o $(WINTARGET) $(BUILDOBJS) $(WINRES_TRG) $(SLFLAGS)
+	$(STRIP) $(WINTARGET)
 
 clean:
 	-rm -f $(BUILDOBJS) $(TARGET) $(WINTARGET) $(WINRES_TRG)

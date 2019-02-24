@@ -216,22 +216,17 @@ void setup_screen()
 	}
 
 	// Set video mode
-	screen = SDL_SetVideoMode(PMWidth, PMHeight, depth, SDL_HWSURFACE | SDL_DOUBLEBUF | (clc_fullscreen ? SDL_FULLSCREEN : 0));
+	rl_screen = SDL_SetVideoMode(PMWidth, PMHeight, depth, SDL_HWSURFACE | SDL_DOUBLEBUF | (clc_fullscreen ? SDL_FULLSCREEN : 0));
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, PMWidth, PMHeight, depth, 0,0,0,0);
 	if (screen == NULL) {
 		fprintf(stderr, "Couldn't set video mode: %s\n", SDL_GetError());
 		exit(1);
 	}
 
 	// Calculate pitch and offset
-	if (depth == 32) {
-		PixPitch = screen->pitch / 4;
-		PMOff = (PMOffY * screen->pitch) + (PMOffX * 4);
-		UIOff = (UIOffY * screen->pitch) + (UIOffX * 4);
-	} else {
-		PixPitch = screen->pitch / 2;
-		PMOff = (PMOffY * screen->pitch) + (PMOffX * 2);
-		UIOff = (UIOffY * screen->pitch) + (UIOffX * 2);
-	}
+	PixPitch = screen->pitch / 2;
+	PMOff = (PMOffY * screen->pitch) + (PMOffX * 2);
+	UIOff = (UIOffY * screen->pitch) + (UIOffX * 2);
 	clc_bpp = depth;
 }
 
@@ -364,7 +359,8 @@ void menuloop()
 
 			// Unlock surface
 			SDL_UnlockSurface(screen);
-			SDL_Flip(screen);
+			SDL_BlitSurface(screen, NULL, rl_screen, NULL);
+			SDL_Flip(rl_screen);
 		}
 
 		// Handle events
@@ -509,7 +505,8 @@ int main(int argc, char **argv)
 
 			// Unlock surface
 			SDL_UnlockSurface(screen);
-			SDL_Flip(screen);
+			SDL_BlitSurface(screen, NULL, rl_screen, NULL);
+			SDL_Flip(rl_screen);
 		}
 
 		// Handle events

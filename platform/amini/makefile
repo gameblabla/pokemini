@@ -1,16 +1,17 @@
-# PokeMini Makefile for SDL
+# PokeMini Makefile for SDL 1.2 (Linux)
 
-CC =  nspire-gcc
-LD =  nspire-gcc
-STRIP = 
 POKEROOT = ../../
 BUILD = Build
-TARGET = pokemini.elf
+TARGET = PokeMini
 
-CFLAGS = -Ofast -fomit-frame-pointer -mthumb -mthumb-interwork -marm -march=armv5te -mtune=arm926ej-s -DNO_ZIP -DPERFORMANCE -Wall $(INCLUDE)
-SLFLAGS = -Wl,--as-needed -O -lSDL -lm
+WINTARGET = PokeMini.exe
+WINRES_TRG = $(BUILD)/pokemini_rc.o
+WINRES_SRC = $(POKEROOT)resource/pokemini.rc
 
-INCDIRS = source sourcex resource freebios
+CFLAGS += -Wall `$(SDL_BASE)sdl-config --cflags` $(INCLUDE)
+SLFLAGS += `$(SDL_BASE)sdl-config --libs` -lm -lz
+
+INCDIRS = source sourcex resource freebios dependencies/minizip
 
 OBJS = \
  PokeMini_SDL.o	\
@@ -45,6 +46,8 @@ OBJS = \
  source/UI.o	\
  source/Joystick.o	\
  source/Keyboard.o	\
+ dependencies/minizip/unzip.o	\
+ dependencies/minizip/ioapi.o	\
  resource/PokeMini_ColorPal.o	\
  resource/PokeMini_Font12.o	\
  resource/PokeMini_Icons12.o	\
@@ -101,17 +104,8 @@ INCLUDE = $(foreach inc, $(INCDIRS), -I$(POKEROOT)$(inc))
 VPATH = $(addprefix $(POKEROOT),$(INCDIRS))
 
 .PHONY: all win clean
- 
-all: $(BUILD) $(TARGET) gzn prg
 
-gzn:
-	genzehn --input ./$(TARGET) --output ./pokemini.tns --name "pokemini" --compress
-
-prg:
-	make-prg ./pokemini.tns ./pokemini.prg.tns
-	rm ./pokemini.tns
-	rm ./$(TARGET)
-	mv ./pokemini.prg.tns ./pokemini.tns
+all: $(BUILD) $(TARGET)
 
 $(BUILD):
 	@[ -d @ ] || mkdir -p $@
@@ -120,7 +114,10 @@ $(BUILD)/%.o: %.c $(DEPENDSHDR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(TARGET): $(BUILDOBJS)
-	$(LD) -o $(TARGET) $(BUILDOBJS) $(SLFLAGS)
+	$(CC) -o $(TARGET) $(BUILDOBJS) $(SLFLAGS)
+
+win:
+	make -f makefile.win
 
 clean:
 	-rm -f $(BUILDOBJS) $(TARGET) $(WINTARGET) $(WINRES_TRG)

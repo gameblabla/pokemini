@@ -45,12 +45,14 @@ void CommandLineInit(void)
 #ifdef PERFORMANCE
 	CommandLine.sound = MINX_AUDIO_GENERATED;
 	CommandLine.piezofilter = 0;	// Piezo Filter
+	CommandLine.lcdfilter = 0;	// LCD Filter
+	CommandLine.lcdmode = 1;	// LCD Mode
 #else
 	CommandLine.sound = MINX_AUDIO_DIRECTPWM;
 	CommandLine.piezofilter = 1;	// Piezo Filter
-#endif
 	CommandLine.lcdfilter = 1;	// LCD Filter
 	CommandLine.lcdmode = 0;	// LCD Mode
+#endif
 	CommandLine.low_battery = 0;	// Low Battery
 	CommandLine.palette = 0;	// Palette Index
 	CommandLine.rumblelvl = 3;	// Rumble level
@@ -70,18 +72,18 @@ void CommandLineInit(void)
 	CommandLine.joybutton[8] = 9;	// Power: Button 9
 	CommandLine.joybutton[9] = 6;	// Shake: Button 6
 	// Keyboard mapping (Magic numbers!)
-	#ifdef _TINSPIRE
+#ifdef OPENDINGUX
 	CommandLine.keyb_a[0] = PMKEYB_ESCAPE;	// Menu:  ESCAPE
 	CommandLine.keyb_a[1] = PMKEYB_LCTRL;	// A:     X
-	CommandLine.keyb_a[2] = PMKEYB_LSHIFT;	// B:     Z
-	CommandLine.keyb_a[3] = PMKEYB_BACKSPACE;	// C:     C
+	CommandLine.keyb_a[2] = PMKEYB_LALT;	// B:     Z
+	CommandLine.keyb_a[3] = PMKEYB_LSHIFT;	// C:     C
 	CommandLine.keyb_a[4] = PMKEYB_UP;	// Up:    UP
 	CommandLine.keyb_a[5] = PMKEYB_DOWN;	// Down:  DOWN
 	CommandLine.keyb_a[6] = PMKEYB_LEFT;	// Left:  LEFT
 	CommandLine.keyb_a[7] = PMKEYB_RIGHT;	// Right: RIGHT
-	CommandLine.keyb_a[8] = PMKEYB_TAB;	// Power: E
-	CommandLine.keyb_a[9] = PMKEYB_7;	// Shake: A
-	#else
+	CommandLine.keyb_a[8] = PMKEYB_SPACE;	// Power: E
+	CommandLine.keyb_a[9] = PMKEYB_TAB;	// Shake: A
+#else
 	CommandLine.keyb_a[0] = PMKEYB_ESCAPE;	// Menu:  ESCAPE
 	CommandLine.keyb_a[1] = PMKEYB_X;	// A:     X
 	CommandLine.keyb_a[2] = PMKEYB_Z;	// B:     Z
@@ -92,8 +94,7 @@ void CommandLineInit(void)
 	CommandLine.keyb_a[7] = PMKEYB_RIGHT;	// Right: RIGHT
 	CommandLine.keyb_a[8] = PMKEYB_E;	// Power: E
 	CommandLine.keyb_a[9] = PMKEYB_A;	// Shake: A
-	#endif
-	
+#endif
 	// Keyboard alternative mapping (Magic numbers!)
 	CommandLine.keyb_b[0] = PMKEYB_Q;	// Menu:  Q
 	CommandLine.keyb_b[1] = PMKEYB_NONE;	// A:     NONE
@@ -113,7 +114,7 @@ void CommandLineInit(void)
 	CommandLine.lcdbright = 0;		// LCD bright offset
 	CommandLine.multicart = 0;	// Multicart support
 #ifdef PERFORMANCE
-	CommandLine.synccycles = 128;	// Sync cycles to 64 (Performance)
+	CommandLine.synccycles = 512;	// Sync cycles to 512 (Performance)
 #else
 	CommandLine.synccycles = 8;	// Sync cycles to 8 (Accurant)
 #endif

@@ -1,25 +1,34 @@
-# PokeMini Makefile for SDL
+# PokeMini Makefile for Dingux
 
-CC =  nspire-gcc
-LD =  nspire-gcc
-STRIP = 
-POKEROOT = ../../
+DINGUX_TK = /opt/rs97-toolchain/usr
+HOST = mipsel-linux-
+
+ifeq ($(DINGUX_TK),)
+CC = $(HOST)gcc
+LD = $(HOST)gcc
+STRIP = $(HOST)strip
+else
+CC = $(DINGUX_TK)/bin/$(HOST)gcc
+LD = $(DINGUX_TK)/bin/$(HOST)gcc
+STRIP = $(DINGUX_TK)/bin/$(HOST)strip
+endif
+
 BUILD = Build
-TARGET = pokemini.elf
+TARGET = pokemini.dge
+POKEROOT = ../../
 
-CFLAGS = -DARM9 -Ofast -fomit-frame-pointer -mthumb -mthumb-interwork -marm -march=armv5te -mtune=arm926ej-s -DNO_ZIP -DPERFORMANCE -DNSPIRE -Wall $(INCLUDE)
-SLFLAGS = -Wl,--as-needed -flto -O -lSDL -lm
+CFLAGS = -Ofast -mplt -mips32 -Wall -s -lSDL $(INCLUDE) -DPERFORMANCE -DNO_SCANDIRS
+SLFLAGS = -Ofast -mips32 -lm -lz -s -lSDL
 
-INCDIRS = source sourcex resource freebios
+INCDIRS = source resource freebios dependencies/minizip
 
 OBJS = \
- n2DLib.o	\
- PokeMini_SDL.o	\
- PokeMini.o	\
- Hardware_nsp.o	\
+ PokeMini_Dingux.o	\
  freebios/freebios.o	\
  source/PMCommon.o	\
+ source/PokeMini.o	\
  source/Multicart.o	\
+ source/Hardware.o	\
  source/Video.o	\
  source/Video_x3.o	\
  source/CommandLine.o	\
@@ -34,16 +43,17 @@ OBJS = \
  source/MinxPRC.o	\
  source/MinxColorPRC.o	\
  source/MinxLCD.o	\
+ source/MinxAudio.o	\
  source/UI.o	\
  source/Joystick.o	\
+ dependencies/minizip/unzip.o	\
+ dependencies/minizip/ioapi.o	\
  resource/PokeMini_ColorPal.o	\
  resource/PokeMini_Font12.o	\
  resource/PokeMini_Icons12.o	\
- resource/PokeMini_BG3.o	\
+ resource/PokeMini_BG3.o
 
 DEPENDS = \
- sourcex/ExportBMP.h	\
- sourcex/ExportWAV.h	\
  freebios/freebios.h	\
  source/IOMap.h	\
  source/PMCommon.h	\
@@ -69,25 +79,16 @@ DEPENDS = \
  resource/PokeMini_ColorPal.h	\
  resource/PokeMini_Font12.h	\
  resource/PokeMini_Icons12.h	\
- resource/PokeMini_BG3.h	\
+ resource/PokeMini_BG3.h
 
 BUILDOBJS = $(addprefix $(BUILD)/, $(notdir $(OBJS)))
 DEPENDSHDR = $(addprefix $(POKEROOT), $(DEPENDS))
 INCLUDE = $(foreach inc, $(INCDIRS), -I$(POKEROOT)$(inc))
 VPATH = $(addprefix $(POKEROOT),$(INCDIRS))
 
-.PHONY: all win clean
- 
-all: $(BUILD) $(TARGET) gzn prg
+.PHONY: all clean
 
-gzn:
-	genzehn --input ./$(TARGET) --output ./pokemini.tns --name "pokemini" --compress
-
-prg:
-	make-prg ./pokemini.tns ./pokemini.prg.tns
-	rm ./pokemini.tns
-	rm ./$(TARGET)
-	mv ./pokemini.prg.tns ./pokemini.tns
+all: $(BUILD) $(TARGET)
 
 $(BUILD):
 	@[ -d @ ] || mkdir -p $@
@@ -97,7 +98,9 @@ $(BUILD)/%.o: %.c $(DEPENDSHDR)
 
 $(TARGET): $(BUILDOBJS)
 	$(LD) -o $(TARGET) $(BUILDOBJS) $(SLFLAGS)
+	$(STRIP) $(TARGET)
 
 clean:
-	-rm -f $(BUILDOBJS) $(TARGET) $(WINTARGET) $(WINRES_TRG)
+	-rm -f $(BUILDOBJS) $(TARGET)
 	-rmdir --ignore-fail-on-non-empty $(BUILD)
+

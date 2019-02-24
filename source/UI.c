@@ -387,12 +387,7 @@ int UIMenu_ReadDir(char *dirname)
 			if (items >= UI_MAXCACHE) break;
 		} else {
 			// File
-			#ifdef _TINSPIRE
-			if (strstr(de->name, ".min.tns")) 
-			#else
-			if (ExtensionCheck(de->name, ".min")) 
-			#endif
-			{
+			if (ExtensionCheck(de->name, ".min")) {
 				UIMenu_FileListCache[items].stats = 2;
 				sprintf(file, "%sc", de->name);
 				if (FileExist(file)) UIMenu_FileListCache[items].color = 1;
@@ -441,7 +436,7 @@ int UIMenu_ReadDir(char *dirname)
 			if (items >= UI_MAXCACHE) break;
 		} else {
 			// File
-			if (ExtensionCheck(dirEntry->d_name, ".min") || ExtensionCheck(dirEntry->d_name, ".tns")) {
+			if (ExtensionCheck(dirEntry->d_name, ".min")) {
 				UIMenu_FileListCache[items].stats = 2;
 				sprintf(file, "%sc", dirEntry->d_name);
 				if (FileExist(file)) UIMenu_FileListCache[items].color = 1;

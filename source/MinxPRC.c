@@ -44,12 +44,12 @@ const uint8_t PRCInvertBit[256] = { // Invert Bit table
 	0x0F, 0x8F, 0x4F, 0xCF, 0x2F, 0xAF, 0x6F, 0xEF, 0x1F, 0x9F, 0x5F, 0xDF, 0x3F, 0xBF, 0x7F, 0xFF
 };
 
-#ifdef PERFORMANCE
-int StallCycles = 64;	// Stall CPU cycles
+/* Breaks cycle accuracy for sure */
+#ifdef PERFORMANCE_EXTRA
+int StallCycles = 128;	// Stall CPU cycles
 #else
 int StallCycles = 32;	// Stall CPU cycles
 #endif
-
 TMinxPRC_Render MinxPRC_Render = MinxPRC_Render_Mono;
 
 //

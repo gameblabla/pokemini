@@ -1,36 +1,37 @@
-# PokeMini Makefile for Dingux
+# PokeMini Makefile for SDL 1.2 (Linux)
 
-DINGUX_TK = /opt/gcw0-toolchain/usr
-HOST = mipsel-gcw0-linux-uclibc-
+CHAINPREFIX=/opt/rs97-toolchain
+CROSS_COMPILE=$(CHAINPREFIX)/usr/bin/mipsel-linux-
+CC = $(CROSS_COMPILE)gcc
+CXX = $(CROSS_COMPILE)g++
+STRIP = $(CROSS_COMPILE)strip
+SYSROOT     := $(CHAINPREFIX)/usr/mipsel-buildroot-linux-musl/sysroot
+SDL_CFLAGS  := $(shell $(SYSROOT)/usr/bin/sdl-config --cflags)
+SDL_LIBS    := $(shell $(SYSROOT)/usr/bin/sdl-config --libs)
 
-ifeq ($(DINGUX_TK),)
-CC = $(HOST)gcc
-LD = $(HOST)gcc
-STRIP = $(HOST)strip
-else
-CC = $(DINGUX_TK)/bin/$(HOST)gcc
-LD = $(DINGUX_TK)/bin/$(HOST)gcc
-STRIP = $(DINGUX_TK)/bin/$(HOST)strip
-endif
-
-BUILD = Build
-TARGET = PokeMini.dge
 POKEROOT = ../../
+BUILD = Build
+TARGET = pokemini.dge
 
-CFLAGS = -O2 -Wall -g -lSDL $(INCLUDE) -DPERFORMANCE
-SLFLAGS = -O2 -lm -lz -g -lSDL
+CFLAGS += -Wall $(SDL_CFLAGS) $(INCLUDE) -DOPENDINGUX -DPERFORMANCE
+CFLAGS += -O3 -fno-signed-zeros -fno-trapping-math -fdata-sections -ffunction-sections -mno-check-zero-division -mno-fp-exceptions -fno-PIC -fno-common -mips32 -fno-PIC -mno-abicalls -mframe-header-opt
+CFLAGS += -fprofile-use
+SLFLAGS += $(SDL_LIBS) -lgcov -lm -lz -Wl,--as-needed -Wl,--gc-sections -flto -s
 
-INCDIRS = source resource freebios dependencies/minizip
+INCDIRS = source sourcex resource freebios dependencies/minizip
 
 OBJS = \
- PokeMini_Dingux.o	\
+ PokeMini_SDL.o	\
+ sourcex/KeybMapSDL.o	\
+ sourcex/ExportBMP.o	\
+ sourcex/ExportWAV.o	\
  freebios/freebios.o	\
  source/PMCommon.o	\
  source/PokeMini.o	\
  source/Multicart.o	\
  source/Hardware.o	\
  source/Video.o	\
- source/Video_x3.o	\
+ source/Video_x4.o	\
  source/CommandLine.o	\
  source/MinxCPU.o	\
  source/MinxCPU_XX.o	\
@@ -46,14 +47,18 @@ OBJS = \
  source/MinxAudio.o	\
  source/UI.o	\
  source/Joystick.o	\
+ source/Keyboard.o	\
  dependencies/minizip/unzip.o	\
  dependencies/minizip/ioapi.o	\
  resource/PokeMini_ColorPal.o	\
  resource/PokeMini_Font12.o	\
  resource/PokeMini_Icons12.o	\
- resource/PokeMini_BG3.o
+ resource/PokeMini_BG4.o	\
 
 DEPENDS = \
+ sourcex/KeybMapSDL.h	\
+ sourcex/ExportBMP.h	\
+ sourcex/ExportWAV.h	\
  freebios/freebios.h	\
  source/IOMap.h	\
  source/PMCommon.h	\
@@ -61,8 +66,7 @@ DEPENDS = \
  source/PokeMini_Version.h	\
  source/Multicart.h	\
  source/Hardware.h	\
- source/Video.h	\
- source/Video_x3.h	\
+ source/Video_x4.h	\
  source/CommandLine.h	\
  source/MinxCPU.h	\
  source/MinxTimers.h	\
@@ -74,19 +78,20 @@ DEPENDS = \
  source/MinxAudio.h	\
  source/UI.h	\
  source/Joystick.h	\
+ source/Keyboard.h	\
  dependencies/minizip/unzip.h	\
  dependencies/minizip/ioapi.h	\
  resource/PokeMini_ColorPal.h	\
  resource/PokeMini_Font12.h	\
  resource/PokeMini_Icons12.h	\
- resource/PokeMini_BG3.h
+ resource/PokeMini_BG4.h	\
 
 BUILDOBJS = $(addprefix $(BUILD)/, $(notdir $(OBJS)))
 DEPENDSHDR = $(addprefix $(POKEROOT), $(DEPENDS))
 INCLUDE = $(foreach inc, $(INCDIRS), -I$(POKEROOT)$(inc))
 VPATH = $(addprefix $(POKEROOT),$(INCDIRS))
 
-.PHONY: all clean
+.PHONY: all win clean
 
 all: $(BUILD) $(TARGET)
 
@@ -97,10 +102,11 @@ $(BUILD)/%.o: %.c $(DEPENDSHDR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(TARGET): $(BUILDOBJS)
-	$(LD) -o $(TARGET) $(BUILDOBJS) $(SLFLAGS)
-	$(STRIP) $(TARGET)
+	$(CC) -o $(TARGET) $(BUILDOBJS) $(SLFLAGS)
+
+win:
+	make -f makefile.win
 
 clean:
-	-rm -f $(BUILDOBJS) $(TARGET)
+	-rm -f $(BUILDOBJS) $(TARGET) $(WINTARGET) $(WINRES_TRG)
 	-rmdir --ignore-fail-on-non-empty $(BUILD)
-

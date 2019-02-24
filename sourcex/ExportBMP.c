@@ -25,11 +25,7 @@ FILE *OpenUnique_ExportBMP(int *choosennumber, int width, int height)
 	char file[32];
 	FILE *ft;
 	for (i=0; i<16777216; i++) {
-#ifdef NSPIRE
-		sprintf(file, "snap_%03d.bmp.tns", i);
-#else
 		sprintf(file, "snap_%03d.bmp", i);
-#endif
 		ft = fopen(file, "r");
 		if (!ft) break;
 		fclose(ft);

@@ -21,7 +21,6 @@
 #include <string.h>
 #include <math.h>
 #include "n2DLib.h"
-#include "SDL.h"
 
 #include "PokeMini.h"
 #include "Hardware.h"
@@ -29,7 +28,6 @@
 #include "ExportWAV.h"
 #include "Joystick.h"
 #include "Keyboard.h"
-#include "KeybMapSDL.h"
 
 #include "Video_x1.h"
 #include "Video_x2.h"
@@ -67,7 +65,7 @@ const TCommandLineCustom CustomConf[] = {
 int UIItems_PlatformC(int index, int reason);
 TUIMenu_Item UIItems_Platform[] = {
 	PLATFORMDEF_GOBACK,
-	{ 0,  9, "Define Buttons...", UIItems_PlatformC },
+	/*{ 0,  9, "Define Buttons...", UIItems_PlatformC },*/
 	PLATFORMDEF_SAVEOPTIONS,
 	PLATFORMDEF_END(UIItems_PlatformC)
 };
@@ -81,13 +79,13 @@ int UIItems_PlatformC(int index, int reason)
 	if (reason == UIMENU_CANCEL) {
 		UIMenu_PrevMenu();
 	}
-	if (reason == UIMENU_RIGHT) {
+	/*if (reason == UIMENU_RIGHT) {
 		switch (index) {
 			case 9: // Define Keyboard...
 				KeyboardEnterMenu();
 				break;
 		}
-	}
+	}*/
 	return 1;
 }
 
@@ -120,35 +118,54 @@ void setup_screen()
 	UIOff = (UIOffY * 320) + (UIOffX * 2);
 }
 
+#define PAD_BUTTON_LEFT 0x0001
+#define PAD_BUTTON_RIGHT 0x0002
+#define PAD_BUTTON_DOWN 0x0004
+#define PAD_BUTTON_UP 0x0008
+#define PAD_TRIGGER_Z 0x0010
+#define PAD_TRIGGER_R 0x0020
+#define PAD_TRIGGER_L 0x0040
+#define PAD_BUTTON_A 0x0100
+#define PAD_BUTTON_B 0x0200
+#define PAD_BUTTON_X 0x0400
+#define PAD_BUTTON_Y 0x0800
+#define PAD_BUTTON_MENU 0x1000
+#define PAD_BUTTON_START 0x1000
+
 // Handle keyboard and quit events
-void handleevents(SDL_Event *event)
+void handleevents()
 {
-	switch (event->type) {
-	case SDL_KEYDOWN:
-			KeyboardPressEvent(event->key.keysym.sym);
-		break;
-	case SDL_KEYUP:
-			KeyboardReleaseEvent(event->key.keysym.sym);
-		break;
-	case SDL_QUIT:
+	unsigned int press = 0;
+	
+	t_key pad;
+	if (isKeyPressed(KEY_NSPIRE_UP))
+		press = press << PAD_BUTTON_UP;
+	if (isKeyPressed(KEY_NSPIRE_LEFT))
+		press = press << PAD_BUTTON_LEFT;
+	if (isKeyPressed(KEY_NSPIRE_RIGHT))
+		press = press << PAD_BUTTON_RIGHT;
+	if (isKeyPressed(KEY_NSPIRE_DOWN))
+		press = press << PAD_BUTTON_DOWN;
+	if (isKeyPressed(KEY_NSPIRE_CTRL))
+		press = press << PAD_BUTTON_A;
+	if (isKeyPressed(KEY_NSPIRE_SHIFT))
+		press = press << PAD_BUTTON_B;
+	if (isKeyPressed(KEY_NSPIRE_TAB))
+		press = press << PAD_BUTTON_START;
+	if (isKeyPressed(KEY_NSPIRE_ESC))
 		emurunning = 0;
-		break;
-	};
+		
+	JoystickBitsEvent(press);
 }
 
 // Used to fill the sound buffer
-void emulatorsound(void *unused, Uint8 *stream, int len)
+void emulatorsound(void *unused, uint8_t *stream, int len)
 {
-	/*MinxAudio_GetSamplesS16((int16_t *)stream, len>>1);
-	if (clc_dump_sound[0]) WriteS16A_ExportWAV(sdump, (int16_t *)stream, len>>1);*/
 }
 
 // Enable / Disable sound
 void enablesound(int sound)
 {
-	/*MinxAudi	clearBufferB();
-	updateScreen();o_ChangeEngine(sound);
-	if (AudioEnabled) SDL_PauseAudio(!sound);*/
 }
 
 // Callback when joystick is re-opened
@@ -159,10 +176,10 @@ void reopen_joystick(int enable, int index)
 // Menu loop
 void menuloop()
 {
-	SDL_Event event;
+	//SDL_Event event;
 
 	// Update window's title and stop sound
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+	//SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
 
 	// Update EEPROM
 	PokeMini_SaveFromCommandLines(0);
@@ -183,7 +200,7 @@ void menuloop()
 		updateScreen();
 
 		// Handle events
-		while (SDL_PollEvent(&event)) handleevents(&event);
+		handleevents();
 		
 	}
 	
@@ -193,13 +210,13 @@ void menuloop()
 	// Apply configs
 	PokeMini_ApplyChanges();
 	if (UI_Status == UI_STATUS_EXIT) emurunning = 0;
-	SDL_EnableKeyRepeat(0, 0);
+	//SDL_EnableKeyRepeat(0, 0);
 }
 
 // Main function
 int main(int argc, char **argv)
 {
-	SDL_Event event;
+	//SDL_Event event;
 	char title[256];
 	char fpstxt[16];
 
@@ -210,7 +227,7 @@ int main(int argc, char **argv)
 	CommandLineConfFile("pokemini.cfg.tns", "pokemini_sdl.cfg.tns", CustomConf);
 
 	// Initialize SDL
-	SDL_Init(SDL_INIT_VIDEO);
+	//SDL_Init(SDL_INIT_VIDEO);
 	
 	initBuffering();
 	
@@ -219,7 +236,7 @@ int main(int argc, char **argv)
 	
 	setup_screen();
 	enablesound(0);
-	SDL_EnableKeyRepeat(0, 0);
+	//SDL_EnableKeyRepeat(0, 0);
 	
 	// Initialize the emulator
 	printf("Starting emulator...\n");
@@ -242,7 +259,7 @@ int main(int argc, char **argv)
 	// Enable sound & init UI
 	printf("Running emulator...\n");
 	UIMenu_Init();
-	KeyboardRemap(&KeybMapSDL);
+	//KeyboardRemap(&KeybMapSDL);
 
 	// Emulator's loop
 	unsigned long time, NewTickFPS = 0, NewTickSync = 0;
@@ -258,7 +275,7 @@ int main(int argc, char **argv)
 		updateScreen();
 
 		// Handle events
-		while (SDL_PollEvent(&event)) handleevents(&event);
+		handleevents();
 		
 		// Menu
 		if (UI_Status == UI_STATUS_MENU) menuloop();
@@ -278,7 +295,7 @@ int main(int argc, char **argv)
 	printf("Shutdown emulator...\n");
 	PokeMini_VideoPalette_Free();
 	PokeMini_Destroy();
-	SDL_Quit();
+	//SDL_Quit();
 
 	return 0;
 }

@@ -1,7 +1,7 @@
 # PokeMini Makefile for SDL 1.2 (Mingw)
 
-CC = i586-mingw32msvc-gcc
-STRIP = i586-mingw32msvc-strip
+CC = gcc
+STRIP = strip
 POKEROOT = ../../
 BUILD = Build
 
@@ -9,9 +9,8 @@ WINTARGET = PokeMini.exe
 WINRES_TRG = $(BUILD)/pokemini_rc.o
 WINRES_SRC = $(POKEROOT)resource/pokemini.rc
 
-CFLAGS = -O -Wall `$(SDL_BASE)sdl-config --cflags` $(INCLUDE) -DBUILD_DLL
-SLFLAGS = -lmingw32 -lSDLmain -lSDL -lm -lz -mwindows
-
+CFLAGS = -O -Wall `$(SDL_BASE)sdl-config --cflags` $(INCLUDE)
+SLFLAGS = -O `$(SDL_BASE)sdl-config --libs` -lm -lz
 
 INCDIRS = source sourcex resource freebios dependencies/minizip
 
@@ -116,7 +115,8 @@ $(BUILD)/%.o: %.c $(DEPENDSHDR)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 $(WINTARGET): $(BUILDOBJS) $(WINRES_SRC)
-	$(CC) -o $(WINTARGET) $(BUILDOBJS) $(SLFLAGS)
+	windres $(INCLUDE) $(WINRES_SRC) $(WINRES_TRG)
+	$(CC) -o $(WINTARGET) $(BUILDOBJS) $(WINRES_TRG) $(SLFLAGS)
 	$(STRIP) $(WINTARGET)
 
 clean:
