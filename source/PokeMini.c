@@ -976,7 +976,11 @@ int PokeMini_LoadROM(const char *filename)
 
 	// Load Individual EEPROM
 	if (!CommandLine.eeprom_share) {
+#ifdef _TINSPIRE
+		sprintf(CommandLine.eeprom_file, "%s.eep.tns", CommandLine.min_file);
+#else
 		sprintf(CommandLine.eeprom_file, "%s.eep", CommandLine.min_file);
+#endif
 		MinxIO_FormatEEPROM();
 		if (FileExist(CommandLine.eeprom_file)) PokeMini_LoadEEPROMFile(CommandLine.eeprom_file);
 	}
@@ -1037,7 +1041,11 @@ int PokeMini_LoadFromCommandLines(const char *nobios, const char *noeeprom)
 		PokeMini_GotoCustomDir(tmp);
 	} else {
 		// Individual EEPROM
+#ifdef _TINSPIRE
+		sprintf(CommandLine.eeprom_file, "%s.eep.tns", CommandLine.min_file);
+#else
 		sprintf(CommandLine.eeprom_file, "%s.eep", CommandLine.min_file);
+#endif
 		MinxIO_FormatEEPROM();
 		if (FileExist(CommandLine.eeprom_file)) PokeMini_LoadEEPROMFile(CommandLine.eeprom_file);
 	}
