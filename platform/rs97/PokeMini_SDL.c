@@ -32,11 +32,13 @@
 
 const char *AppName = "PokeMini " PokeMini_Version " Dingux";
 
+static SDL_Rect rct;
+
 // Sound buffer size
 #define SOUNDBUFFER	2048
 #define PMSOUNDBUFF	(SOUNDBUFFER*2)
 
-SDL_Surface* real_screen;
+SDL_Surface* rl_screen;
 uint32_t x, y;
 uint32_t *s, *d;
 // --------
@@ -198,7 +200,8 @@ void menuloop()
 			UIMenu_Display_16((uint16_t *)screen->pixels + ScOffP, PixPitch);
 			// Unlock surface
 			SDL_UnlockSurface(screen);
-			SDL_Flip(screen);
+			SDL_SoftStretch(screen, &rct, rl_screen, NULL);
+			SDL_Flip(rl_screen);
 		}
 
 		// Handle events
@@ -215,6 +218,10 @@ void menuloop()
 // Main function
 int main(int argc, char **argv)
 {
+	rct.x = 16;
+	rct.y = 24;
+	rct.w = 288;
+	rct.h = 192;
 	SDL_Joystick *joy;
 	SDL_Event event;
 
@@ -246,18 +253,25 @@ int main(int argc, char **argv)
 
 	// Initialize the display
 	
-	screen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE|SDL_TRIPLEBUF); // SDL_HWSURFACE | SDL_DOUBLEBUF
-	if (screen == NULL) {
+	rl_screen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE
+#ifdef SDL_TRIPLEBUF
+	|SDL_TRIPLEBUF); // SDL_HWSURFACE | SDL_DOUBLEBUF
+#else
+	);
+#endif
+	if (rl_screen == NULL) {
 		fprintf(stderr, "Couldn't set video mode: %s\n", SDL_GetError());
 		exit(1);
 	}
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 16, 0,0,0,0);
+	
 	PixPitch = screen->pitch / 2;
 	ScOffP = (24 * PixPitch) + 16;
 
 	// Initialize the sound
 	SDL_AudioSpec audfmt;
 	audfmt.freq = 44100;
-	audfmt.format = AUDIO_S16;
+	audfmt.format = AUDIO_S16SYS;
 	audfmt.channels = 1;
 	audfmt.samples = SOUNDBUFFER;
 	audfmt.callback = emulatorsound;
@@ -330,7 +344,8 @@ int main(int argc, char **argv)
 			LCDDirty = 0;
 			// Unlock surface
 			SDL_UnlockSurface(screen);
-			SDL_Flip(screen);
+			SDL_SoftStretch(screen, &rct, rl_screen, NULL);
+			SDL_Flip(rl_screen);
 		}
 
 		// Handle events
@@ -344,7 +359,7 @@ int main(int argc, char **argv)
 	enablesound(0);
 	UIMenu_Destroy();
 	
-	if (real_screen) SDL_FreeSurface(real_screen);
+	if (rl_screen) SDL_FreeSurface(rl_screen);
 
 	// Save Stuff
 	PokeMini_SaveFromCommandLines(1);

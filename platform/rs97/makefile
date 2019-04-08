@@ -1,29 +1,20 @@
-# PokeMini Makefile for Dingux
+# PokeMini Makefile for SDL
 
-DINGUX_TK = /opt/rs97-toolchain/usr
-HOST = mipsel-linux-
-
-ifeq ($(DINGUX_TK),)
-CC = $(HOST)gcc
-LD = $(HOST)gcc
-STRIP = $(HOST)strip
-else
-CC = $(DINGUX_TK)/bin/$(HOST)gcc
-LD = $(DINGUX_TK)/bin/$(HOST)gcc
-STRIP = $(DINGUX_TK)/bin/$(HOST)strip
-endif
-
-BUILD = Build
-TARGET = pokemini.dge
+CC = /opt/rs97-toolchain/bin/mipsel-linux-gcc
+LD = /opt/rs97-toolchain/bin/mipsel-linux-gcc
+STRIP = /opt/rs97-toolchain/bin/mipsel-linux-strip
 POKEROOT = ../../
+BUILD = Build
+TARGET = PokeMini
 
-CFLAGS = -Ofast -mplt -mips32 -Wall -s -lSDL $(INCLUDE) -DPERFORMANCE -DNO_SCANDIRS
-SLFLAGS = -Ofast -mips32 -lm -lz -s -lSDL
+CFLAGS = -Ofast -fdata-sections -ffunction-sections -mno-fp-exceptions -mno-check-zero-division -mframe-header-opt -fno-common -flto -Wall $(INCLUDE) -DPERFORMANCE
+SLFLAGS = -Ofast -lSDL -lm -lz -flto -no-pie -Wl,--as-needed -Wl,--gc-sections -lz
 
-INCDIRS = source resource freebios dependencies/minizip
+INCDIRS = source sourcex resource freebios dependencies/minizip
 
 OBJS = \
- PokeMini_Dingux.o	\
+ PokeMini_SDL.o	\
+ sourcex/KeybMapSDL.o	\
  freebios/freebios.o	\
  source/PMCommon.o	\
  source/PokeMini.o	\
@@ -46,14 +37,16 @@ OBJS = \
  source/MinxAudio.o	\
  source/UI.o	\
  source/Joystick.o	\
- dependencies/minizip/unzip.o	\
- dependencies/minizip/ioapi.o	\
+ source/Keyboard.o	\
  resource/PokeMini_ColorPal.o	\
  resource/PokeMini_Font12.o	\
  resource/PokeMini_Icons12.o	\
+ dependencies/unzip.o	\
+ dependencies/ioapi.o	\
  resource/PokeMini_BG3.o
 
 DEPENDS = \
+ sourcex/KeybMapSDL.h	\
  freebios/freebios.h	\
  source/IOMap.h	\
  source/PMCommon.h	\
@@ -74,13 +67,15 @@ DEPENDS = \
  source/MinxAudio.h	\
  source/UI.h	\
  source/Joystick.h	\
- dependencies/minizip/unzip.h	\
- dependencies/minizip/ioapi.h	\
+ source/Keyboard.h	\
  resource/PokeMini_ColorPal.h	\
  resource/PokeMini_Font12.h	\
  resource/PokeMini_Icons12.h	\
- resource/PokeMini_BG3.h
-
+ resource/PokeMini_BG3.h	\
+ dependencies/minizip/unzip.h	\
+ dependencies/minizip/ioapi.h	
+ 
+ 
 BUILDOBJS = $(addprefix $(BUILD)/, $(notdir $(OBJS)))
 DEPENDSHDR = $(addprefix $(POKEROOT), $(DEPENDS))
 INCLUDE = $(foreach inc, $(INCDIRS), -I$(POKEROOT)$(inc))
@@ -98,9 +93,7 @@ $(BUILD)/%.o: %.c $(DEPENDSHDR)
 
 $(TARGET): $(BUILDOBJS)
 	$(LD) -o $(TARGET) $(BUILDOBJS) $(SLFLAGS)
-	$(STRIP) $(TARGET)
 
 clean:
-	-rm -f $(BUILDOBJS) $(TARGET)
+	-rm -f $(BUILDOBJS) $(TARGET) $(WINTARGET) $(WINRES_TRG)
 	-rmdir --ignore-fail-on-non-empty $(BUILD)
-
