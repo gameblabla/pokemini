@@ -1,0 +1,48 @@
+#!/bin/sh
+
+mkdir -p ipkg/home/retrofw/emus/pokemini
+mkdir -p ipkg/home/retrofw/apps/gmenu2x/sections/emulators
+cp ./PokeMini ipkg/home/retrofw/emus/pokemini/pokemini
+cp ../../resource/pokemini.png ipkg/home/retrofw/emus/pokemini/pokemini.png
+
+cd ipkg
+
+# https://unix.stackexchange.com/questions/219268/how-to-add-new-lines-when-using-echo
+print()
+	case    ${IFS- } in
+	(\ *)   printf  %b\\n "$*";;
+	(*)     IFS=\ $IFS
+	printf  %b\\n "$*"
+	IFS=${IFS#?}
+esac
+
+# Create GmenuNx entry file plus other things
+
+print 'Package: pokemini
+Version: 20190408
+Description: Pokemon Mini emulator
+Section: emus
+Priority: optional
+Maintainer: senquack
+Architecture: mipsel
+Homepage: https://github.com/gameblabla/pokemini
+Depends:
+Source: https://github.com/gameblabla/pokemini' > control
+
+print '2.0' > debian-binary
+
+print 'title=pokemini
+description=Pokemon Mini Emulator
+exec=/home/retrofw/emus/pcsx4all/pcsx4all
+clock=600
+params=$f
+selectordir=/home/retrofw/roms
+selectorfilter=.min,.zip,.bin
+' > home/retrofw/apps/gmenu2x/sections/emulators/pokemini
+
+tar -czvf control.tar.gz control --owner=0 --group=0
+tar -czvf data.tar.gz home --owner=0 --group=0
+ar rv ../pokemini.ipk control.tar.gz data.tar.gz debian-binary
+
+cd ..
+rm -r ipkg
