@@ -48,7 +48,7 @@ void CommandLineInit(void)
 	CommandLine.lcdfilter = 0;	// LCD Filter
 	CommandLine.lcdmode = 1;	// LCD Mode
 #else
-	CommandLine.sound = MINX_AUDIO_DIRECTPWM;
+	CommandLine.sound = MINX_AUDIO_EMULATED;
 	CommandLine.piezofilter = 1;	// Piezo Filter
 	CommandLine.lcdfilter = 1;	// LCD Filter
 	CommandLine.lcdmode = 0;	// LCD Mode
@@ -114,9 +114,9 @@ void CommandLineInit(void)
 	CommandLine.lcdbright = 0;		// LCD bright offset
 	CommandLine.multicart = 0;	// Multicart support
 #ifdef PERFORMANCE
-	CommandLine.synccycles = 512;	// Sync cycles to 512 (Performance)
+	CommandLine.synccycles = 64;	// Sync cycles to 64 (Performance)
 #else
-	CommandLine.synccycles = 8;	// Sync cycles to 8 (Accurant)
+	CommandLine.synccycles = 8;	// Sync cycles to 8 (Accurate)
 #endif
 }
 
