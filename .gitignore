@@ -10,3 +10,6 @@ PokeMini
 pokemini
 *.opk
 *.cfg
+*.opk
+*.bin
+*.gcno
