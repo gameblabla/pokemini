@@ -35,7 +35,7 @@ const char *AppName = "PokeMini " PokeMini_Version " Dingux";
 static SDL_Rect rct;
 
 // Sound buffer size
-#define SOUNDBUFFER	2048
+#define SOUNDBUFFER	1024
 #define PMSOUNDBUFF	(SOUNDBUFFER*2)
 
 static SDL_Surface* rl_screen;
@@ -337,7 +337,7 @@ int main(int argc, char **argv)
 	ScOffP = (24 * PixPitch) + 16;
 
 	// Initialize the sound
-	SDL_AudioSpec audfmt;
+	SDL_AudioSpec audfmt, outfmt;
 	audfmt.freq = 44100;
 	audfmt.format = AUDIO_S16SYS;
 	audfmt.channels = 1;
@@ -346,7 +346,7 @@ int main(int argc, char **argv)
 	audfmt.userdata = NULL;
 
 	// Open the audio device
-	if (SDL_OpenAudio(&audfmt, NULL) < 0) {
+	if (SDL_OpenAudio(&audfmt, &outfmt) < 0) {
 		fprintf(stderr, "Unable to open audio: %s\n", SDL_GetError());
 		fprintf(stderr, "Audio will be disabled\n");
 		AudioEnabled = 0;

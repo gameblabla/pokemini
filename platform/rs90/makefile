@@ -11,7 +11,7 @@ PROFILE = 0
 FLAGS_OPT = -Ofast -fdata-sections -ffunction-sections -mno-fp-exceptions -mno-check-zero-division -mframe-header-opt -fno-common -flto -fwhole-program -fsingle-precision-constant -mips32 -fno-PIC -mno-abicalls
 
 CFLAGS	= $(FLAGS_OPT) -Wall $(INCLUDE) -DPERFORMANCE -DOPENDINGUX
-SLFLAGS = -nodefaultlibs -lc -lgcc -lm -lSDL -lz -no-pie -Wl,--as-needed -Wl,--gc-sections -s -flto
+SLFLAGS = -nodefaultlibs -lc -lgcc -lm -lSDL -lasound -lz -no-pie -Wl,--as-needed -Wl,--gc-sections -s -flto
 
 ifeq ($(PROFILE), YES)
 CFLAGS 		+= -fprofile-generate="/media/QEMU VVFAT"
