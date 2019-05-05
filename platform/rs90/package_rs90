@@ -24,6 +24,7 @@ Exec=PokeMini %f
 Icon=icon
 Terminal=false
 Type=Application
+selectorfilter=.min
 Categories=emulators;
 X-OD-NeedsDownscaling=false' > opk/default.rs90.desktop
 

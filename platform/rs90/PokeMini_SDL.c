@@ -20,6 +20,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <SDL/SDL.h>
 
 #include "PokeMini.h"
@@ -285,6 +290,9 @@ void menuloop()
 	SDL_EnableKeyRepeat(0, 0);
 }
 
+char home_path[256];
+char conf_path[512];
+
 // Main function
 int main(int argc, char **argv)
 {
@@ -301,8 +309,16 @@ int main(int argc, char **argv)
 	// Process arguments
 	printf("%s\n\n", AppName);
 	PokeMini_InitDirs(argv[0], NULL);
+	
+	snprintf(home_path, sizeof(home_path), "%s/.pokemini", getenv("HOME"));
+	snprintf(conf_path, sizeof(conf_path), "%s/pokemini.cfg", home_path);
+	if (access( home_path, F_OK ) == -1)
+	{ 
+		mkdir(home_path, 0755);
+	}
+	
 	CommandLineInit();
-	CommandLineConfFile("pokemini.cfg", NULL, NULL);
+	CommandLineConfFile(conf_path, NULL, NULL);
 	if (!CommandLineArgs(argc, argv, NULL)) {
 		PrintHelpUsage(stdout);
 		return 1;
