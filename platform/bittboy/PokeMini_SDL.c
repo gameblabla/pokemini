@@ -109,9 +109,9 @@ int UIItems_PlatformC(int index, int reason);
 void ScalingEnterMenu(void);
 
 TUIMenu_Item UIItems_Platform[] = {
-	PLATFORMDEF_GOBACK,
+	//PLATFORMDEF_GOBACK,
 	{ 0,  2, "Scaling settings", UIItems_PlatformC },
-	{ 0,  3, "Joystick settings", UIItems_PlatformC },
+	{ 0,  3, "Button mapping", UIItems_PlatformC },
 	PLATFORMDEF_SAVEOPTIONS,
 	PLATFORMDEF_END(UIItems_PlatformC)
 };
@@ -247,6 +247,11 @@ static void Clear_Screen()
 // Menu loop
 void menuloop()
 {
+	SDL_Rect mnu;
+	mnu.x = 0;
+	mnu.y = 0;
+	mnu.w = 320;
+	mnu.h = 240;
 	SDL_Event event;
 	
 	// Stop sound
@@ -273,7 +278,7 @@ void menuloop()
 			UIMenu_Display_16((uint16_t *)screen->pixels + ScOffP, PixPitch);
 			// Unlock surface
 			SDL_UnlockSurface(screen);
-			SDL_SoftStretch(screen, &rct, rl_screen, NULL);
+			SDL_SoftStretch(screen, &mnu, rl_screen, NULL);
 			SDL_Flip(rl_screen);
 		}
 
@@ -296,15 +301,15 @@ char conf_path[512];
 // Main function
 int main(int argc, char **argv)
 {
-	rct.x = 0;
-	rct.y = 0;
-	rct.w = 320;
-	rct.h = 240;
+	rct.x = 16;
+	rct.y = 24;
+	rct.w = 288;
+	rct.h = 192;
 	SDL_Joystick *joy;
 	SDL_Event event;
 	SDL_Rect pos;
-	pos.x = 48;
-	pos.y = 32;
+	pos.x = (320-192)/2;
+	pos.y = (240-128)/2;
 
 	// Process arguments
 	printf("%s\n\n", AppName);
