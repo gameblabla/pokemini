@@ -95,13 +95,13 @@ int Joy_KeysMapping[] = {
 	12,		// Menu
 	6,		// A
 	7,		// B
-	11,		// C
+	8,		// C
 	2,		// Up
 	3,		// Down
 	4,		// Left
 	5,		// Right
 	1,		// Power
-	10		// Shake
+	9		// Shake
 };
 
 // Platform menu (REQUIRED >= 0.4.4)
@@ -323,7 +323,7 @@ int main(int argc, char **argv)
 		PrintHelpUsage(stdout);
 		return 1;
 	}
-	JoystickSetup("Dingoo", 0, 30000, Joy_KeysNames, 12, Joy_KeysMapping);
+	JoystickSetup("Dingoo", 0, 30000, Joy_KeysNames, 13, Joy_KeysMapping);
 
 	// Initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0) {

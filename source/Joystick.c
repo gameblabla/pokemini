@@ -48,13 +48,13 @@ static const char *JoyLastIndexStr[] = {
 // Joystick menu
 int UIItems_JoystickC(int index, int reason);
 TUIMenu_Item UIItems_Joystick[] = {
-	{ 0,  0, "Go back...", UIItems_JoystickC },
-	{ 0,  1, "Apply changes...", UIItems_JoystickC },
-	{ 0, 21, "Check inputs...", UIItems_JoystickC },
+	// { 0,  0, "Go back...", UIItems_JoystickC },
+	#ifndef SIMPLE_CONTROLS
 	{ 0,  2, "Enable Joystick: %s", UIItems_JoystickC },
-	{ 0, 20, "Device Index: %i", UIItems_JoystickC },
-	{ 0,  3, "Axis as D-Pad: %s", UIItems_JoystickC },
-	{ 0,  4, "Hats as D-Pad: %s", UIItems_JoystickC },
+	{ 0, 20, "Device Index:    %i", UIItems_JoystickC },
+	{ 0,  3, "Axis as D-Pad:   %s", UIItems_JoystickC },
+	{ 0,  4, "Hats as D-Pad:   %s", UIItems_JoystickC },
+	#endif
 	{ 0,  8, "Menu", UIItems_JoystickC },
 	{ 0,  9, "A", UIItems_JoystickC },
 	{ 0, 10, "B", UIItems_JoystickC },
@@ -65,7 +65,9 @@ TUIMenu_Item UIItems_Joystick[] = {
 	{ 0, 15, "Right", UIItems_JoystickC },
 	{ 0, 16, "Power", UIItems_JoystickC },
 	{ 0, 17, "Shake", UIItems_JoystickC },
-	{ 9,  0, "Joystick", UIItems_JoystickC }
+	{ 0, 21, "Test buttons", UIItems_JoystickC },
+	{ 0,  1, "Apply settings", UIItems_JoystickC },
+	{ 9,  0, "Joystick", UIItems_JoystickC },
 };
 
 static const char *PM_Keys[] = {
@@ -89,16 +91,16 @@ int JoyTestButtons(int line, char *outtext)
 	}
 	if (line == 0) {
 		if (JoyLastButton == -1) {
-			sprintf(outtext, "Last button: None");
+			sprintf(outtext, "%-16s %s", "Last button", "None");
 		} else if (Joybuttons_names && (JoyLastButton < Joybuttons_num)) {
-			sprintf(outtext, "Last button: %s", Joybuttons_names[JoyLastButton+1]);
+			sprintf(outtext, "%-16s %s", "Last button", Joybuttons_names[JoyLastButton+1]);
 		} else {
-			sprintf(outtext, "Last button: %i", JoyLastButton);
+			sprintf(outtext, "%-16s %i", "Last button", JoyLastButton);
 		}
 	}
-	if (line == 1) sprintf(outtext, "Last hat: %s", JoyLastIndexStr[JoyLastHat]);
-	if (line == 2) sprintf(outtext, "X-Axis: %i", JoyLastXAxis);
-	if (line == 3) sprintf(outtext, "Y-Axis: %i", JoyLastYAxis);
+	if (line == 1) sprintf(outtext, "%-16s %s", "Last hat", JoyLastIndexStr[JoyLastHat]);
+	if (line == 2) sprintf(outtext, "%-16s %i", "X-Axis", JoyLastXAxis);
+	if (line == 3) sprintf(outtext, "%-16s %i", "Y-Axis", JoyLastYAxis);
 	return line < 4;
 }
 
@@ -154,9 +156,9 @@ int UIItems_JoystickC(int index, int reason)
 					CommandLine.joybutton[i] = TMP_joy[i];
 				}
 				UIMenu_BeginMessage();
-				UIMenu_SetMessage("Joystick definition..", 1);
+				UIMenu_SetMessage("Applying settings..", 1);
 				UIMenu_SetMessage("", 1);
-				UIMenu_SetMessage("Changes applied!", 0);
+				UIMenu_SetMessage("Settings applied!", 0);
 				UIMenu_EndMessage(60);
 				if (JoystickUpdateCB) JoystickUpdateCB(CommandLine.joyenabled, CommandLine.joyid);
 				break;
@@ -195,20 +197,20 @@ int UIItems_JoystickC(int index, int reason)
 				break;
 		}
 	}
-	if (JoyAllowDisable) UIMenu_ChangeItem(UIItems_Joystick, 2, "Enable Joystick: %s", TMP_enable ? "Yes" : "No");
-	else UIMenu_ChangeItem(UIItems_Joystick, 2, "Enable Joystick: Yes");
-	UIMenu_ChangeItem(UIItems_Joystick, 3, "Axis as D-Pad: %s", TMP_axis_dpad ? "Yes" : "No");
-	UIMenu_ChangeItem(UIItems_Joystick, 4, "Hats as D-Pad: %s", TMP_hats_dpad ? "Yes" : "No");
-	UIMenu_ChangeItem(UIItems_Joystick, 20, "Device Index: %i", TMP_deviceid);
+	if (JoyAllowDisable) UIMenu_ChangeItem(UIItems_Joystick,  2, "Enable Joystick  %s", TMP_enable ? "Yes" : "No");
+	else UIMenu_ChangeItem(UIItems_Joystick,  2, "Enable Joystick  Yes");
+	UIMenu_ChangeItem(UIItems_Joystick,  3, "Axis as D-Pad    %s", TMP_axis_dpad ? "Yes" : "No");
+	UIMenu_ChangeItem(UIItems_Joystick,  4, "Hats as D-Pad    %s", TMP_hats_dpad ? "Yes" : "No");
+	UIMenu_ChangeItem(UIItems_Joystick, 20, "Device Index     %i", TMP_deviceid);
 	if (Joybuttons_names) {
 		for (i=0; i<10; i++) {
-			if (Joybuttons_names[TMP_joy[i]+1]) UIMenu_ChangeItem(UIItems_Joystick, i+8, "%s Key: %s", PM_Keys[i], Joybuttons_names[TMP_joy[i]+1]);
-			else UIMenu_ChangeItem(UIItems_Joystick, i+8, "%s Key: Invalid", PM_Keys[i]);
+			if (Joybuttons_names[TMP_joy[i]+1]) UIMenu_ChangeItem(UIItems_Joystick, i+8, "%-16s %s", PM_Keys[i], Joybuttons_names[TMP_joy[i]+1]);
+			else UIMenu_ChangeItem(UIItems_Joystick, i+8, "%-16s Invalid", PM_Keys[i]);
 		}
 	} else {
 		for (i=0; i<10; i++) {
-			if (TMP_joy[i] == -1) UIMenu_ChangeItem(UIItems_Joystick, i+8, "%s Key: Off", PM_Keys[i]);
-			else UIMenu_ChangeItem(UIItems_Joystick, i+8, "%s Key: Button %d", PM_Keys[i], TMP_joy[i]);
+			if (TMP_joy[i] == -1) UIMenu_ChangeItem(UIItems_Joystick, i+8, "%-16s Off", PM_Keys[i]);
+			                 else UIMenu_ChangeItem(UIItems_Joystick, i+8, "%-16s Button %d", PM_Keys[i], TMP_joy[i]);
 		}
 	}
 	return 1;

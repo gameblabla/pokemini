@@ -10,7 +10,7 @@ PROFILE = 0
 
 FLAGS_OPT = -Ofast -fdata-sections -ffunction-sections -fno-common -flto -fwhole-program -fsingle-precision-constant -fno-PIC -ftree-vectorize
 
-CFLAGS	= $(FLAGS_OPT) -Wall $(INCLUDE) -DPERFORMANCE -DOPENDINGUX -DNO_SCANDIRS
+CFLAGS	= $(FLAGS_OPT) -Wall $(INCLUDE) -DPERFORMANCE -DOPENDINGUX -DNO_SCANDIRS -DSIMPLE_CONTROLS
 SLFLAGS = -nodefaultlibs -lc -lgcc -lm -lSDL -lasound -lz -no-pie -Wl,--as-needed -Wl,--gc-sections -s -flto
 
 ifeq ($(PROFILE), YES)
