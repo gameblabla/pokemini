@@ -343,7 +343,7 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Couldn't set video spec\n");
 		exit(1);
 	}
-	UIMenu_SetDisplay(288, 192, PokeMini_RGB16, (uint8_t *)PokeMini_BG3, (uint16_t *)PokeMini_BG3_PalBGR16, (uint32_t *)PokeMini_BG3_PalBGR32);
+	UIMenu_SetDisplay(288, 192, PokeMini_BGR16, (uint8_t *)PokeMini_BG3, (uint16_t *)PokeMini_BG3_PalBGR16, (uint32_t *)PokeMini_BG3_PalBGR32);
 
 	// Initialize the display
 	

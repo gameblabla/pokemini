@@ -228,7 +228,7 @@ TUIMenu_Item UIItems_MainMenu[] = {
 	{ 0,  3, "Save State     0", UIItems_MainMenuC },
 	{ 0,  4, "Reset          Hard", UIItems_MainMenuC },
 	{ 0,  5, "Settings", UIItems_MainMenuC },
-	{ 0,  6, "Platform", UIItems_MainMenuC },
+	{ 0,  6, "Advanced", UIItems_MainMenuC },
 	{ 0,  7, "About", UIItems_MainMenuC },
 	{ 0,  8, "Exit", UIItems_MainMenuC },
 	{ 9,  0, "Main Menu", UIItems_MainMenuC }
