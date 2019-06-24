@@ -20,6 +20,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <libgen.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <SDL/SDL.h>
 
 #include "PokeMini.h"
@@ -32,10 +36,15 @@
 
 const char *AppName = "PokeMini " PokeMini_Version " Dingux";
 
+static SDL_Rect rct;
+
 // Sound buffer size
 #define SOUNDBUFFER	2048
 #define PMSOUNDBUFF	(SOUNDBUFFER*2)
 
+SDL_Surface* rl_screen;
+uint32_t x, y;
+uint32_t *s, *d;
 // --------
 
 // Joystick names and mapping (NEW IN 0.5.0)
@@ -71,7 +80,7 @@ int Joy_KeysMapping[] = {
 int UIItems_PlatformC(int index, int reason);
 TUIMenu_Item UIItems_Platform[] = {
 	PLATFORMDEF_GOBACK,
-	{ 0,  9, "Define Joystick...", UIItems_PlatformC },
+	/*{ 0,  9, "Define Joystick...", UIItems_PlatformC },*/
 	PLATFORMDEF_SAVEOPTIONS,
 	PLATFORMDEF_END(UIItems_PlatformC)
 };
@@ -178,10 +187,9 @@ void menuloop()
 
 	// Update EEPROM
 	PokeMini_SaveFromCommandLines(0);
-	
-	SDL_FillRect(screen, NULL, 0);
 
 	// Menu's loop
+	SDL_FillRect(screen, NULL, 0);
 	while (emurunning && (UI_Status == UI_STATUS_MENU)) {
 		// Slowdown to approx. 60fps
 		SDL_Delay(16);
@@ -193,10 +201,11 @@ void menuloop()
 		//SDL_FillRect(screen, NULL, 0);
 		if (SDL_LockSurface(screen) == 0) {
 			// Render the menu or the game screen
-			UIMenu_Display_16((uint16_t *)screen->pixels, PixPitch);
+			UIMenu_Display_16((uint16_t *)screen->pixels + ScOffP, PixPitch);
 			// Unlock surface
 			SDL_UnlockSurface(screen);
-			SDL_Flip(screen);
+			SDL_SoftStretch(screen, &rct, rl_screen, NULL);
+			SDL_Flip(rl_screen);
 		}
 
 		// Handle events
@@ -207,8 +216,6 @@ void menuloop()
 	PokeMini_ApplyChanges();
 	if (UI_Status == UI_STATUS_EXIT) emurunning = 0;
 	else enablesound(CommandLine.sound);
-	
-	SDL_FillRect(screen, NULL, 0);
 	SDL_EnableKeyRepeat(0, 0);
 }
 
@@ -218,9 +225,14 @@ int main(int argc, char **argv)
 	char home_path[256], conf_path[256];
 	SDL_Joystick *joy;
 	SDL_Event event;
+	rct.x = 16;
+	rct.y = 24;
+	rct.w = 288;
+	rct.h = 192;
 
 	// Process arguments
 	printf("%s\n\n", AppName);
+
 	snprintf(home_path, sizeof(home_path), "%s/.pokemini", getenv("HOME"));
 	snprintf(conf_path, sizeof(conf_path), "%s/pokemini.cfg", home_path);
 	if (access( home_path, F_OK ) == -1) mkdir(home_path, 0755);
@@ -235,8 +247,7 @@ int main(int argc, char **argv)
 	JoystickSetup("Dingoo", 0, 30000, Joy_KeysNames, 12, Joy_KeysMapping);
 
 	// Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0) 
-	{
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK) < 0) {
 		fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
 		exit(1);
 	}
@@ -251,18 +262,21 @@ int main(int argc, char **argv)
 	UIMenu_SetDisplay(288, 192, PokeMini_BGR16, (uint8_t *)PokeMini_BG3, (uint16_t *)PokeMini_BG3_PalBGR16, (uint32_t *)PokeMini_BG3_PalBGR32);
 
 	// Initialize the display
-	screen = SDL_SetVideoMode(288, 192, 16, SDL_SWSURFACE); 
-	if (screen == NULL) {
+	
+	rl_screen = SDL_SetVideoMode(0, 0, 16, SDL_HWSURFACE);
+	if (rl_screen == NULL) {
 		fprintf(stderr, "Couldn't set video mode: %s\n", SDL_GetError());
 		exit(1);
 	}
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 240, 16, 0,0,0,0);
+	
 	PixPitch = screen->pitch / 2;
 	ScOffP = (24 * PixPitch) + 16;
 
 	// Initialize the sound
 	SDL_AudioSpec audfmt;
 	audfmt.freq = 44100;
-	audfmt.format = AUDIO_S16;
+	audfmt.format = AUDIO_S16SYS;
 	audfmt.channels = 1;
 	audfmt.samples = SOUNDBUFFER;
 	audfmt.callback = emulatorsound;
@@ -324,20 +338,19 @@ int main(int argc, char **argv)
 
 		// Screen rendering
 		//SDL_FillRect(screen, NULL, 0);
-		
 		if (SDL_LockSurface(screen) == 0) {
 			// Render the menu or the game screen
 			if (PokeMini_Rumbling) {
 				SDL_FillRect(screen, NULL, 0);
-				PokeMini_VideoBlit((uint16_t *)screen->pixels + 1 + PokeMini_GenRumbleOffset(PixPitch), PixPitch);
+				PokeMini_VideoBlit((uint16_t *)screen->pixels + ScOffP + PokeMini_GenRumbleOffset(PixPitch), PixPitch);
 			} else {
-				PokeMini_VideoBlit((uint16_t *)screen->pixels, PixPitch);
+				PokeMini_VideoBlit((uint16_t *)screen->pixels + ScOffP, PixPitch);
 			}
 			LCDDirty = 0;
-
 			// Unlock surface
 			SDL_UnlockSurface(screen);
-			SDL_Flip(screen);
+			SDL_SoftStretch(screen, &rct, rl_screen, NULL);
+			SDL_Flip(rl_screen);
 		}
 
 		// Handle events
@@ -350,6 +363,8 @@ int main(int argc, char **argv)
 	// Disable sound & free UI
 	enablesound(0);
 	UIMenu_Destroy();
+	
+	if (rl_screen) SDL_FreeSurface(rl_screen);
 
 	// Save Stuff
 	PokeMini_SaveFromCommandLines(1);
