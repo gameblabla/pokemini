@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
+#include <sys/stat.h>
 #include <SDL/SDL.h>
 
 #include "PokeMini.h"
