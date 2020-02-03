@@ -31,7 +31,7 @@
 #include "Video_x3.h"
 #include "PokeMini_BG3.h"
 
-const char *AppName = "PokeMini " PokeMini_Version " Dingux - Mandy's Build";
+const char *AppName = "PokeMini " PokeMini_Version " Dingux";
 
 // Sound buffer size
 #define SOUNDBUFFER	2048
@@ -194,7 +194,7 @@ void menuloop()
 		//SDL_FillRect(screen, NULL, 0);
 		if (SDL_LockSurface(screen) == 0) {
 			// Render the menu or the game screen
-			UIMenu_Display_16((uint16_t *)screen->pixels, PixPitch);
+			UIMenu_Display_16((uint16_t *)screen->pixels + 16 + ( 24 * PixPitch ), PixPitch);
 			// Unlock surface
 			SDL_UnlockSurface(screen);
 			SDL_Flip(screen);
