@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=PokeMini
+Comment=Pokemon Mini emulator
+Exec=pokemini %f
+Icon=icon
+Terminal=false
+Categories=emulators;
+X-OD-Manual=readme.txt
