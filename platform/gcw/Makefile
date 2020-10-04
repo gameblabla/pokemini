@@ -15,9 +15,13 @@ endif
 BUILD = Build
 TARGET = pokemini
 POKEROOT = ../../
+HUGE_PAGES = 1
 
-CFLAGS = -O2 -Wall -s -lSDL -Wl,--as-needed $(INCLUDE) -DPERFORMANCE -mips32r2 -DNO_SCANDIRS -I/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/include
-SLFLAGS = -O2 -lm -lz -s -lSDL -Wl,--as-needed
+CFLAGS = -Ofast -flto -Wall -s -lSDL -Wl,--as-needed $(INCLUDE) -DPERFORMANCE -mips32r2 -DNO_SCANDIRS -I/opt/gcw0-toolchain/usr/mipsel-gcw0-linux-uclibc/sysroot/usr/include
+SLFLAGS = -Ofast -flto -lm -lz -s -lSDL -Wl,--as-needed
+ifeq ($(HUGE_PAGES), 1)
+SLFLAGS		+= -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152 -lhugetlbfs
+endif
 
 INCDIRS = source resource freebios dependencies/minizip
 
@@ -98,6 +102,9 @@ $(BUILD)/%.o: %.c $(DEPENDSHDR)
 $(TARGET): $(BUILDOBJS)
 	$(LD) -o $(TARGET) $(BUILDOBJS) $(SLFLAGS)
 	$(STRIP) $(TARGET)
+ifeq ($(HUGE_PAGES), 1)
+	hugeedit --text --data $(TARGET)
+endif
 
 clean:
 	-rm -f $(BUILDOBJS) $(TARGET)

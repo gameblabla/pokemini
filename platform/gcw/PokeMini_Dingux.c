@@ -22,6 +22,9 @@
 #include <math.h>
 #include <SDL/SDL.h>
 
+#include <unistd.h>
+#include <fcntl.h>
+
 #include "PokeMini.h"
 #include "Hardware.h"
 #include "Joystick.h"
