@@ -18,7 +18,7 @@
 
 #include <sys/types.h>
 #include <ctype.h>
-
+#include <libgen.h>
 #ifndef NO_SCANDIRS
 #include <sys/stat.h>
 #include <dirent.h>

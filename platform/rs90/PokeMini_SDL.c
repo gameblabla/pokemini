@@ -342,7 +342,7 @@ int main(int argc, char **argv)
 
 	// Initialize the display
 	
-	rl_screen = SDL_SetVideoMode(240, 160, 16, SDL_HWSURFACE);
+	rl_screen = SDL_SetVideoMode(240, 160, 16, SDL_HWSURFACE | SDL_TRIPLEBUF);
 	if (rl_screen == NULL) {
 		fprintf(stderr, "Couldn't set video mode: %s\n", SDL_GetError());
 		exit(1);
