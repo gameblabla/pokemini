@@ -303,8 +303,15 @@ int main(int argc, char **argv)
 	SDL_Joystick *joy;
 	SDL_Event event;
 	SDL_Rect pos;
-	pos.x = (240-192)/2;
-	pos.y = (160-128)/2;
+
+	// Get native resolution
+	const SDL_Surface* vidSurface = SDL_SetVideoMode(0, 0, 8, SDL_HWSURFACE | SDL_HWPALETTE);
+	uint32_t width = vidSurface->w;
+	uint32_t height = vidSurface->h;
+	printf("Native resolution: %dx%d\n", width, height);
+
+	pos.x = (width-192)/2;
+	pos.y = (height-128)/2;
 
 	// Process arguments
 	printf("%s\n\n", AppName);
@@ -342,12 +349,12 @@ int main(int argc, char **argv)
 
 	// Initialize the display
 	
-	rl_screen = SDL_SetVideoMode(240, 160, 16, SDL_HWSURFACE | SDL_TRIPLEBUF);
+	rl_screen = SDL_SetVideoMode(width, height, 16, SDL_HWSURFACE | SDL_TRIPLEBUF);
 	if (rl_screen == NULL) {
 		fprintf(stderr, "Couldn't set video mode: %s\n", SDL_GetError());
 		exit(1);
 	}
-	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 240, 160, 16, 0,0,0,0);
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 16, 0,0,0,0);
 
 	PixPitch = screen->pitch / 2;
 	ScOffP = (24 * PixPitch) + 16;
