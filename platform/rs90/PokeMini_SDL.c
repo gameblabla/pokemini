@@ -46,7 +46,6 @@ static SDL_Rect rct;
 static SDL_Surface* rl_screen;
 uint32_t x, y;
 uint32_t *s, *d;
-uint32_t scaling = 0;
 // --------
 
 /* alekmaul's scaler taken from mame4all */
@@ -117,7 +116,7 @@ TUIMenu_Item UIItems_Platform[] = {
 
 int UIItems_PlatformC(int index, int reason)
 {
-	UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", scaling ? "Fullscreen" : "Unscaled");
+	UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", CommandLine.scaling ? "Fullscreen" : "Unscaled");
 	
 	if (reason == UIMENU_OK) reason = UIMENU_RIGHT;
 	if (reason == UIMENU_CANCEL) UIMenu_PrevMenu();
@@ -125,8 +124,8 @@ int UIItems_PlatformC(int index, int reason)
 		switch (index)
 		{
 			case 2:
-				scaling = 0;
-				UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", scaling ? "Fullscreen" : "Unscaled");
+				CommandLine.scaling = 0;
+				UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", CommandLine.scaling ? "Fullscreen" : "Unscaled");
 			break;
 		}
 	}
@@ -134,8 +133,8 @@ int UIItems_PlatformC(int index, int reason)
 		switch (index)
 		{
 			case 2:
-				scaling = 1;
-				UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", scaling ? "Fullscreen" : "Unscaled");
+				CommandLine.scaling = 1;
+				UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", CommandLine.scaling ? "Fullscreen" : "Unscaled");
 			break;
 			case 3:
 				JoystickEnterMenu();
@@ -434,7 +433,7 @@ int main(int argc, char **argv)
 			LCDDirty = 0;
 			// Unlock surface
 			SDL_UnlockSurface(screen);
-			if (scaling == 1)
+			if (CommandLine.scaling == 1)
 			{
 				bitmap_scale(16, 24, 192, 128, rl_screen->w, rl_screen->h, screen->w, 0, (uint16_t* restrict)screen->pixels, (uint16_t* restrict)rl_screen->pixels);
 			}
