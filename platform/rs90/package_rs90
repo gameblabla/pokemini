@@ -28,6 +28,6 @@ selectorfilter=.min
 Categories=emulators;
 X-OD-NeedsDownscaling=false' > opk/default.rs90.desktop
 
-mksquashfs ./opk pokemini_rs90.opk -all-root -noappend -no-exports -no-xattrs
+mksquashfs ./opk pokemini_rs90_rg99.opk -all-root -noappend -no-exports -no-xattrs
 
 rm -r opk
