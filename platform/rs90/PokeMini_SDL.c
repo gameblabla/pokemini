@@ -46,7 +46,6 @@ static SDL_Rect rct;
 static SDL_Surface* rl_screen;
 uint32_t x, y;
 uint32_t *s, *d;
-uint32_t scaling = 0;
 // --------
 
 /* alekmaul's scaler taken from mame4all */
@@ -117,7 +116,7 @@ TUIMenu_Item UIItems_Platform[] = {
 
 int UIItems_PlatformC(int index, int reason)
 {
-	UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", scaling ? "Fullscreen" : "Unscaled");
+	UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", CommandLine.scaling ? "Fullscreen" : "Unscaled");
 	
 	if (reason == UIMENU_OK) reason = UIMENU_RIGHT;
 	if (reason == UIMENU_CANCEL) UIMenu_PrevMenu();
@@ -125,8 +124,8 @@ int UIItems_PlatformC(int index, int reason)
 		switch (index)
 		{
 			case 2:
-				scaling = 0;
-				UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", scaling ? "Fullscreen" : "Unscaled");
+				CommandLine.scaling = 0;
+				UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", CommandLine.scaling ? "Fullscreen" : "Unscaled");
 			break;
 		}
 	}
@@ -134,8 +133,8 @@ int UIItems_PlatformC(int index, int reason)
 		switch (index)
 		{
 			case 2:
-				scaling = 1;
-				UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", scaling ? "Fullscreen" : "Unscaled");
+				CommandLine.scaling = 1;
+				UIMenu_ChangeItem(UIItems_Platform, 2, "Scaling: %s", CommandLine.scaling ? "Fullscreen" : "Unscaled");
 			break;
 			case 3:
 				JoystickEnterMenu();
@@ -303,8 +302,15 @@ int main(int argc, char **argv)
 	SDL_Joystick *joy;
 	SDL_Event event;
 	SDL_Rect pos;
-	pos.x = (240-192)/2;
-	pos.y = (160-128)/2;
+
+	// Get native resolution
+	const SDL_Surface* vidSurface = SDL_SetVideoMode(0, 0, 8, SDL_HWSURFACE | SDL_HWPALETTE);
+	uint32_t width = vidSurface->w;
+	uint32_t height = vidSurface->h;
+	printf("Native resolution: %dx%d\n", width, height);
+
+	pos.x = (width-192)/2;
+	pos.y = (height-128)/2;
 
 	// Process arguments
 	printf("%s\n\n", AppName);
@@ -342,12 +348,12 @@ int main(int argc, char **argv)
 
 	// Initialize the display
 	
-	rl_screen = SDL_SetVideoMode(240, 160, 16, SDL_HWSURFACE | SDL_TRIPLEBUF);
+	rl_screen = SDL_SetVideoMode(width, height, 16, SDL_HWSURFACE | SDL_TRIPLEBUF);
 	if (rl_screen == NULL) {
 		fprintf(stderr, "Couldn't set video mode: %s\n", SDL_GetError());
 		exit(1);
 	}
-	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 240, 160, 16, 0,0,0,0);
+	screen = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 16, 0,0,0,0);
 
 	PixPitch = screen->pitch / 2;
 	ScOffP = (24 * PixPitch) + 16;
@@ -427,7 +433,7 @@ int main(int argc, char **argv)
 			LCDDirty = 0;
 			// Unlock surface
 			SDL_UnlockSurface(screen);
-			if (scaling == 1)
+			if (CommandLine.scaling == 1)
 			{
 				bitmap_scale(16, 24, 192, 128, rl_screen->w, rl_screen->h, screen->w, 0, (uint16_t* restrict)screen->pixels, (uint16_t* restrict)rl_screen->pixels);
 			}

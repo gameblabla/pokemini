@@ -113,6 +113,7 @@ void CommandLineInit(void)
 	CommandLine.lcdcontrast = 64;		// LCD contrast
 	CommandLine.lcdbright = 0;		// LCD bright offset
 	CommandLine.multicart = 0;	// Multicart support
+	CommandLine.scaling = 0;	// No scaling
 #ifdef PERFORMANCE
 	CommandLine.synccycles = 64;	// Sync cycles to 64 (Performance)
 #else
@@ -354,6 +355,7 @@ int CommandLineConfFile(const char *filename, const char *platcfgfile, const TCo
 			else if (!strcasecmp(key, "synccycles")) CommandLine.synccycles = BetweenNum(atoi_Ex(value, 8), 8, 512);
 			else if (!strcasecmp(key, "lcdcontrast")) CommandLine.lcdcontrast = BetweenNum(atoi_Ex(value, 64), 0, 100);
 			else if (!strcasecmp(key, "lcdbright")) CommandLine.lcdbright = BetweenNum(atoi_Ex(value, 0), -100, 100);
+			else if (!strcasecmp(key, "scaling")) CommandLine.scaling = BetweenNum(atoi_Ex(value, 0), 0, 1);
 			else PokeDPrint(POKEMSG_ERR, "Conf warning: Unknown '%s' key\n", key);
 		}
 		fclose(fi);
@@ -474,6 +476,7 @@ int CommandLineConfSave(void)
 			fprintf(fo, "synccycles=%d\n", CommandLine.synccycles);
 			fprintf(fo, "lcdcontrast=%d\n", CommandLine.lcdcontrast);
 			fprintf(fo, "lcdbright=%d\n", CommandLine.lcdbright);
+			fprintf(fo, "scaling=%d\n", CommandLine.scaling);
 			fclose(fo);
 		}
 	}
