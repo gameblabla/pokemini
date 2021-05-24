@@ -355,7 +355,7 @@ int CommandLineConfFile(const char *filename, const char *platcfgfile, const TCo
 			else if (!strcasecmp(key, "synccycles")) CommandLine.synccycles = BetweenNum(atoi_Ex(value, 8), 8, 512);
 			else if (!strcasecmp(key, "lcdcontrast")) CommandLine.lcdcontrast = BetweenNum(atoi_Ex(value, 64), 0, 100);
 			else if (!strcasecmp(key, "lcdbright")) CommandLine.lcdbright = BetweenNum(atoi_Ex(value, 0), -100, 100);
-			else if (!strcasecmp(key, "scaling")) CommandLine.scaling = BetweenNum(atoi_Ex(value, 0), 0, 1);
+			else if (!strcasecmp(key, "scaling")) CommandLine.scaling = BetweenNum(atoi_Ex(value, 0), 0, 2);
 			else PokeDPrint(POKEMSG_ERR, "Conf warning: Unknown '%s' key\n", key);
 		}
 		fclose(fi);
